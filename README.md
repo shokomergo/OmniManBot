@@ -1,5 +1,8 @@
-#﻿OmniManBot:
-A 10x very simple (and awful-looking UI) Rust & Iced chat bot that spouts Omni-Man quotes.
+# OmniManBot
+
+A super simple (and awful-looking UI) Rust & Iced chat bot(kinda) that spouts Omni-Man quotes.
+
+
 
 
 
