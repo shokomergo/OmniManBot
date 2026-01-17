@@ -1,3 +1,5 @@
 ﻿#OmniManBot: 
-A Rust & Iced-based very very very simple chat bot that replies with Omni-Man quotes.
+A 10x very simple (and awful-looking UI) Rust & Iced chat bot that spouts Omni-Man quotes.
+
+
 
