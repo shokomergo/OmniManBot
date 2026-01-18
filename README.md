@@ -1,12 +1,3 @@
 # OmniManBot
 
-A super simple (and awful-looking UI) Rust & Iced chat bot(kinda) that spouts Omni-Man quotes.
-
-
-
-
-
-
-
-
-
+A super simple Rust & ~~Iced~~ *(now egui/eframe)* chat bot(kinda) that spouts Omni-Man quotes.
