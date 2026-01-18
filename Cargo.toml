@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-
-iced = { version = "0.10", features = ["tokio"] }
+eframe = "0.26"
+egui = "0.26"
+image = "0.25"
 rand = "0.8"

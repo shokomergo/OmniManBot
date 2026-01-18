@@ -1,151 +1,135 @@
-use iced::{
-    Alignment, Application, Command, Element, Length, Settings,
-    widget::{button, column, container, scrollable, text, text_input, Button, Column, Container, Scrollable, Text, TextInput},
-};
+use eframe::{egui, App};
+use egui::{Color32, RichText, ScrollArea, Vec2};
+use image::ImageReader;
+use image::imageops::FilterType;
 
-use rand::seq::SliceRandom;
-use rand::thread_rng;
+mod quotes;
+use quotes::OMNI_MAN_QUOTES;
 
-const OMNI_MAN_QUOTES: &[&str] = &[
-    "Think, Mark!",
-    "You want to die for this planet? Fine. What’s 17 more years? I can always start again… make another kid.",
-    "I do love your mother. But she’s more like a… a pet to me.",
-    r#"This isn’t your world. It’s theirs. But we can help them. We can stop wars. Eliminate hunger. Give them medical technology centuries ahead of what they have now.
-    We’ve already been doing it. If it wasn’t for you and me, this planet would be in flames."#,
-    r#"Why did you make me do this? You’re fighting so you can watch everyone around you die! Think, Mark! You’ll outlast every fragile, insignificant being on this planet. 
-    You’ll live to see this world crumble to dust and blow away! Everyone and everything you know will be gone!"#,
-    "I will burn this planet down. Before I spend another Minute living among these animals!",
-    "Are you sure?",
-];
+use quotes::omni_man_reply;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 struct Message {
     role: Role,
     content: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 enum Role {
     User,
     Bot,
 }
 
-#[derive(Clone, Debug)]
-enum AppMessage {
-    InputChanged(String),
-    SendPressed,
-}
-
 struct OmniManBot {
     input_value: String,
     messages: Vec<Message>,
+    bot_avatar: Option<egui::TextureHandle>,
 }
 
-impl Application for OmniManBot {
-    type Message = AppMessage;
-    type Executor = iced::executor::Default;
-    type Flags = ();
-    type Theme = iced::Theme;
-
-    fn new(_flags: ()) -> (Self, Command<Self::Message>) {
-        (
-            OmniManBot {
-                input_value: String::new(),
-                messages: vec![],
-            },
-            Command::none(),
-        )
-    }
-
-    fn title(&self) -> String {
-        "Omni-Man Bot".into()
-    }
-
-    fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
-        match message {
-            AppMessage::InputChanged(val) => {
-                self.input_value = val;
-            }
-            AppMessage::SendPressed => {
-                if !self.input_value.trim().is_empty() {
-                    let user_msg = Message {
-                        role: Role::User,
-                        content: self.input_value.clone(),
-                    };
-                    self.messages.push(user_msg);
-
-                    let last_bot_msg = self.messages.iter().rev()
-                        .find(|m| matches!(m.role, Role::Bot))
-                        .map(|m| m.content.as_str())
-                        .unwrap_or("");
-                    
-                    let bot_reply = omni_man_reply(last_bot_msg);
-                    let bot_msg = Message {
-                        role: Role::Bot,
-                        content: bot_reply,
-                    };
-                    self.messages.push(bot_msg);
-
-                    self.input_value.clear();
-                }
-            }
+impl Default for OmniManBot {
+    fn default() -> Self {
+        Self {
+            input_value: String::new(),
+            messages: vec![],
+            bot_avatar: None,
         }
-        Command::none()
     }
+}
 
-    fn view(&self) -> Element<Self::Message> {
-        let mut scroll_content = column!().spacing(10);
-        for msg in &self.messages {
-            let text = match msg.role {
-                Role::User => format!("You: {}", msg.content),
-                Role::Bot => format!("Omni-Man: {}", msg.content),
+impl App for OmniManBot {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        if self.bot_avatar.is_none() {
+            let img = match ImageReader::open("assets/Are_You_Sure.png") {
+                Ok(reader) => match reader.decode() {
+                    Ok(img) => img,
+                    Err(e) => return,
+                },
+                Err(_) => return,
             };
-            scroll_content = scroll_content.push(Text::new(text));
+
+            let img_small = img.resize_exact(32, 32, FilterType::Triangle);
+
+            let size = [img_small.width() as usize, img_small.height() as usize];
+            let rgba = img_small.to_rgba8().into_vec();
+
+            self.bot_avatar = Some(ctx.load_texture(
+                "bot_avatar",
+                egui::ColorImage::from_rgba_unmultiplied(size, &rgba),
+                egui::TextureOptions::LINEAR,
+            ));
         }
 
-        let scrollable_content = Container::new(scrollable(scroll_content))
-            .padding(10)
-            .width(Length::Fill)
-            .height(Length::Fill);
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ScrollArea::vertical().stick_to_bottom(true).show(ui, |ui|  {
+                for msg in &self.messages {
+                    match msg.role {
+                        Role::User => {
+                            egui::Frame::none()
+                                .fill(Color32::from_rgb(0, 120, 255))
+                                .rounding(5.0)
+                                .inner_margin(egui::Margin::symmetric(8.0, 4.0))
+                                .show(ui, |ui| {
+                                    ui.label(RichText::new(&msg.content).color(Color32::WHITE));
+                                });
+                        }
+                        Role::Bot => {
+                            ui.horizontal(|ui| {
+                                if let Some(tex) = &self.bot_avatar {
+                                    ui.add_sized([32.0, 32.0], egui::Image::new(tex));
+                                }
+                                
+                                egui::Frame::none()
+                                    .fill(Color32::from_rgb(200, 200, 200))
+                                    .rounding(5.0)
+                                    .inner_margin(egui::Margin::symmetric(8.0, 4.0))
+                                    .show(ui, |ui| {
+                                        ui.label(RichText::new(&msg.content).color(Color32::BLACK));
+                                    });
+                            });
 
-        let input_row = Column::new()
-            .spacing(10)
-            .push(
-                TextInput::new("Type your message...", &self.input_value)
-                    .on_input(AppMessage::InputChanged)
-                    .padding(10),
-            )
-            .push(
-                Button::new(Text::new("Send"))
-                .on_press(AppMessage::SendPressed)
-                .padding(10),
-            );
+                        }
+                    }
 
-            let content = Column::new()
-                .spacing(10)
-                .align_items(Alignment::Start)
-                .push(scrollable_content)
-                .push(input_row);
+                    ui.add_space(5.0);
+                }
 
-            Container::new(content)
-                .width(Length::Fill)
-                .height(Length::Fill)
-                .padding(10)
-                .into()
+            });
+
+            ui.add_space(10.0);
+
+            ui.horizontal(|ui| {
+                let input = ui.text_edit_singleline(&mut self.input_value);
+
+                if ui.button("Send").clicked()
+                    || ctx.input(|i| i.key_pressed(egui::Key::Enter) && input.lost_focus())
+                {
+                    if !self.input_value.trim().is_empty() {
+                        self.messages.push(Message {
+                            role: Role::User,
+                            content: self.input_value.clone(),
+                        });
+
+                        let bot_reply = omni_man_reply(&self.input_value);
+                        self.messages.push(Message {
+                            role: Role::Bot,
+                            content: bot_reply,
+                        });
+
+                        self.input_value.clear();
+                    }
+                }
+            });
+        });
+
+        ctx.request_repaint();
     }
 }
 
-fn omni_man_reply(last_message: &str) -> String {
-    let mut rng = thread_rng();
-    
-    loop {
-    let quote = OMNI_MAN_QUOTES.choose(&mut rng).unwrap().to_string();
-    if quote != last_message {
-        return quote;
-        }
-    }
-}
-
-fn main() -> iced::Result {
-    OmniManBot::run(Settings::default())
+fn main() -> eframe::Result<()> {
+    let options = eframe::NativeOptions::default();
+    eframe::run_native(
+        "Omni-Man Bot",
+        options,
+        Box::new(|_cc| Box::new(OmniManBot::default())),
+    )
 }
