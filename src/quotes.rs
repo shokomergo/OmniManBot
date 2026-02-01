@@ -12,7 +12,16 @@ pub const OMNI_MAN_QUOTES: &[&str] = &[
     "I will burn this planet down. Before I spend another Minute living among these animals!",
     "Are you sure?",
     "You're fighting like you're on earth. This is different.",
-    "I Think I Miss My Wife"
+    "I Think I Miss My Wife",
+    "You don’t seem to understand. Earth isn’t yours to conquer.",
+    "That's the neat part you don't.",
+    "Look what they need to mimic a fraction of our power.",
+    "So be it.",
+    "How many more need to die, Mark? is up to you.",
+    "Listen to what I'm saying. You know in your heart I'm right.",
+    "These people are meaningless. They're cavemen without us.",
+    "Sure, I was happy for a time, but I'm loyal to Viltrum, not this pathetic excuse for a civilization.",
+    "Please."
 ];
 
 pub fn omni_man_reply(user_msg: &str) -> String {

@@ -99,26 +99,27 @@ impl App for OmniManBot {
 
             ui.horizontal(|ui| {
                 let input = ui.text_edit_singleline(&mut self.input_value);
-
+                
                 if ui.button("Send").clicked()
-                    || ctx.input(|i| i.key_pressed(egui::Key::Enter) && input.lost_focus())
+                    || (input.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)))
                 {
                     if !self.input_value.trim().is_empty() {
                         self.messages.push(Message {
                             role: Role::User,
                             content: self.input_value.clone(),
                         });
+                    
+                    let bot_reply = omni_man_reply(&self.input_value);
+                    self.messages.push(Message {
+                        role: Role::Bot,
+                        content: bot_reply,
+                    });
 
-                        let bot_reply = omni_man_reply(&self.input_value);
-                        self.messages.push(Message {
-                            role: Role::Bot,
-                            content: bot_reply,
-                        });
-
-                        self.input_value.clear();
+                    self.input_value.clear();
+                    input.request_focus();
                     }
                 }
-            });
+            })
         });
 
         ctx.request_repaint();
