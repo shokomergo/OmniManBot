@@ -1,11 +1,9 @@
 use eframe::{egui, App};
-use egui::{Color32, RichText, ScrollArea, Vec2};
+use egui::{Color32, RichText, ScrollArea};
 use image::ImageReader;
 use image::imageops::FilterType;
 
 mod quotes;
-use quotes::OMNI_MAN_QUOTES;
-
 use quotes::omni_man_reply;
 
 #[derive(Clone)]
@@ -42,7 +40,7 @@ impl App for OmniManBot {
             let img = match ImageReader::open("assets/Are_You_Sure.png") {
                 Ok(reader) => match reader.decode() {
                     Ok(img) => img,
-                    Err(e) => return,
+                    Err(_e) => return,
                 },
                 Err(_) => return,
             };
