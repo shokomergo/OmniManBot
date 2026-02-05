@@ -21,7 +21,17 @@ pub const OMNI_MAN_QUOTES: &[&str] = &[
     "Listen to what I'm saying. You know in your heart I'm right.",
     "These people are meaningless. They're cavemen without us.",
     "Sure, I was happy for a time, but I'm loyal to Viltrum, not this pathetic excuse for a civilization.",
-    "Please."
+    "Please.",
+    "Stay away from my children Lucan.",
+    "I know.",
+    "I'll kill you for what you did these people.",
+    "Talking won't keep you alive Vidor.",
+    "Mark what are you doing she's tearing you apart.",
+    "You're fighting like you're on earth this is different stop holding back or you gonna to get both oof us killed.",
+    "She's trying to kill you Mark.",
+    "Don't think, act.",
+    "DonT worry it's over",
+    "Let me have look."
 ];
 
 pub fn omni_man_reply(user_msg: &str) -> String {
