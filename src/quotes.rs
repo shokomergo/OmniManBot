@@ -30,7 +30,7 @@ pub const OMNI_MAN_QUOTES: &[&str] = &[
     "You're fighting like you're on earth this is different stop holding back or you gonna to get both oof us killed.",
     "She's trying to kill you Mark.",
     "Don't think, act.",
-    "DonT worry it's over",
+    "Don't worry it's over",
     "Let me have look."
 ];
 
